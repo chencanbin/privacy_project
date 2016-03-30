@@ -1,0 +1,275 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>CONDOR SME</title>
+    <link rel="icon" href="../../img/logo-white.png" type="image/x-icon">
+    <!-- Bootstrap core CSS -->
+    <link href="../../css/bootstrap.css" rel="stylesheet">
+    <!-- Add custom CSS here -->
+    <link href="../../css/sb-admin.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/formValidation.css">
+
+    <!-- Page Specific CSS -->
+    <script src="../../js/jquery-1.10.2.js"></script>
+    <script src="../../i18n/ElementLanguage.js"></script>
+    <script src="../../js/util.js"></script>
+    <script type="text/javascript" language="javascript">
+        function reloadLanguage(language) {
+            loadBundles(language);
+            location.reload(true);
+        }
+
+        $(document).ready(function() {
+            $("#email").val( GetQueryString('email'));
+            $('#activateAccount').formValidation({
+                fields: {
+                    password: {
+                        validators: {
+                            notEmpty: {
+                                message: 'The password is required and can\'t be empty'
+                            },
+                            stringLength: {
+                                min: 8,
+                                max: 49,
+                                message: 'The length of your password should be between 8-49 characters.'
+                            },
+                            regexp: {
+                                regexp: /^.*((?=.*\d)(?=.*[a-zA-Z])).*$/,
+                                message: 'User Password Should Contain At Least One Digit And One Alphabet'
+                            }
+                        }
+                    },
+                    confirmPassword: {
+                        validators: {
+                            notEmpty: {
+                                message: 'The confirm password is required and can\'t be empty'
+                            },
+                            identical: {
+                                field: 'password',
+                                message: 'The password and its confirm are not the same'
+                            }
+                        }
+                    },
+                    s_question: {
+                        validators: {
+                            notEmpty: {
+                                message: 'The security question is required and can\'t be empty'
+                            },
+                            stringLength: {
+                                min: 8,
+                                max: 100,
+                                message: 'The length of your security question should not longer than 100 characters.'
+                            }
+                        }
+                    },
+                    s_answer: {
+                        validators: {
+                            notEmpty: {
+                                message: 'The security answer is required and can\'t be empty'
+                            },
+                            stringLength: {
+                                min: 8,
+                                max: 100,
+                                message: 'The length of your security answer should be between 8-100 characters.'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        function onActivateAccount() {
+            var account = $('#email').val();
+            var password = $('#password').val();
+            var s_question = $('#s_question').val();
+            var s_answer = $('#s_answer').val();
+            var code =  GetQueryString('code');
+            var lang = localStorage.getItem('lang');
+            if( lang == 'null') {
+                lang = 'en'
+            }
+            var parObj = {
+                'accountId':account,
+                'timestamp':formatDate(new Date()),
+                'code':code,
+                'password':password,
+                'securityQuestion':s_question,
+                'securityAnswer':s_answer,
+                'lang':lang
+            };
+            var req = generateParmXML(parObj);
+            $.ajax({
+                url: '/proxy',
+                type: 'get',
+                data: {
+                    url: "api/account/setPassword",
+                    param: req
+                },
+                beforeSend: function () {
+                    $("#button_submit").text($.i18n.prop('processing') + '....');
+                    $("#button_submit").addClass("disabled");
+                },
+                success: function (response) {
+                    response = $.parseJSON(response);
+                    if (response.statusCode == 0) {
+                        var accountId = response.accountId;
+                        var departmentName = response.departmentName;
+                        window.location.href='setting-success.html?account='+accountId + '&departmentName='+ departmentName;
+                    } else {
+                        showErrorDialog("error : " + statusCodeTranslate(response.statusCode));
+                        $("#button_submit").text($.i18n.prop('sure_button'));
+                        $("#button_submit").removeClass("disabled");
+                        return;
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    showErrorDialog(textStatus + ":" + jqXHR.status + " " + errorThrown);
+                    $("#button_submit").text($.i18n.prop('sure_button'));
+                    $("#button_submit").removeClass("disabled");
+                }
+            });
+        }
+    </script>
+
+    <style>
+
+    </style>
+</head>
+
+<body>
+
+<div>
+    <!-- Sidebar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <img src="../../img/SD_condor.png" style="margin-top: 5px;"/>
+    </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-ex1-collapse" style="height: 0px">
+            <ul class="nav navbar-nav navbar-right navbar-user">
+                <li class="dropdown alerts-dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="link_language">
+                        <i class="fa fa-lg fa-language"></i> <label id="language"></label>
+                        <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" onclick='reloadLanguage("zh-cn")'>简体中文 </a></li>
+                        <li><a href="#" onclick='reloadLanguage("zh-hk")'>繁體中文 </a></li>
+                        <li><a href="#" onclick='reloadLanguage("en")'>English</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </nav>
+
+    <!--main contain from iframe -->
+    <div id="page-wrapper">
+        <div class="container">
+            <div class="row">
+                <!-- form: -->
+                <section>
+                    <div class="page-header">
+                        <h1><span id="activate_condor_account_title">Activate Condor Account</span></h1>
+                    </div>
+
+                    <div class="col-lg-8 col-lg-offset-2">
+                        <form id="activateAccount" method="post" class="form-horizontal">
+                            <fieldset disabled>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label"><span id="your_email_address">Your Email Address</span></label>
+                                    <div class="col-lg-5">
+                                        <input type="text" class="form-control disabled" name="email" id="email" />
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend id="set_password_title">Set Password</legend>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label"><span id="new_password_title">Password</span></label>
+                                    <div class="col-lg-5">
+                                        <input type="password" class="form-control" name="password" id="password" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label"><span id="comfirm_password_title">Retype password</span></label>
+                                    <div class="col-lg-5">
+                                        <input type="password" class="form-control" name="confirmPassword" />
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend id="set_security_question_title">Set Security Question</legend>
+
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label"><span id="security_question_title">security question</span></label>
+                                    <div class="col-lg-5">
+                                        <input type="text" class="form-control" name="s_question" id="s_question" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label"> <span id="security_answer_title">security answer</span></label>
+                                    <div class="col-lg-5">
+                                        <input type="text" class="form-control" name="s_answer" id="s_answer"/>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <div class="form-group">
+                                <div class="col-lg-9 col-lg-offset-3">
+                                    <button type="button" class="btn btn-primary" id="button_submit" onclick="onActivateAccount()">
+                                        <span id="sure_button"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+                <!-- :form -->
+            </div>
+        </div>
+    </div>
+    <div id="dialog_dock"></div>
+    <div class="modal fade" id="error_dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         style="z-index: 1060"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                    </button>
+                    <p style="margin : 10px;" class="text-warning text-center"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+
+<script src="../../js/bootstrap.js"></script>
+<script src="../../js/formValidation.js"></script>
+<script src="../../js/bootstrap_for_validation.js"></script>
+<!-- Page Specific Plugins -->
+<script src="../../js/raphael-min.js"></script>
+<script src="../../js/hmac-sha256.js"></script>
+<script src="../../js/enc-base64.js"></script>
+
+<!-- i18n support multi language-->
+<script src="../../js/jquery.i18n.properties-1.0.9.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>binding machine dialog</title>
+    <link rel="stylesheet" href="../../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../../css/style.css">
+    <script src="../../../js/jquery-1.10.2.js"></script>
+    <script src="../../../js/bootstrap.js"></script>
+    <script src="../../../js/hmac-sha256.js"></script>
+    <script src="../../../js/enc-base64.js"></script>
+    <script src="../../../js/util.js"></script>
+    <script src="../../../js/jquery.i18n.properties-1.0.9.js"></script>
+    <script src="../../../i18n/ElementLanguage.js"></script>
+    <script type="application/javascript" language="JavaScript">
+
+        function Unregisteremployee() {
+            var admin = adminInfo.accountId;
+            var account = sessionStorage.getItem("accountId");
+            var token = sessionStorage.getItem("token");
+            var param = {"accountId": account};
+            req = getRequestParameter(admin, token, param);
+            $.ajax({
+                url: '/proxy',
+                type: 'get',
+                data: {
+                    url: "api/manage/deleteaccount",
+                    param: req
+                },
+                beforeSend: function () {
+                    $("#unregister_account_button").text($.i18n.prop('processing') + '....');
+                    $("#unregister_account_button").addClass("disabled");
+                },
+                success: function (response) {
+                    response = $.parseJSON(response);
+                    if (response.token) {
+                        sessionStorage.setItem('token', response.token);
+                    }
+
+                    if(!verifyStatusCode(response.statusCode)){return}
+
+                    if( response.statusCode == 0) {
+                        $("#unregister_account_button").text($.i18n.prop('processing') + '....');
+                        $("#unregister_account_button").removeClass("disabled");
+                        closeDialog('dialogMachine');
+                        refreshWindow("iframepage");
+                    } else{
+                        showErrorDialog("error : " + statusCodeTranslate(response.statusCode));
+                        $("#unregister_account_button").text($.i18n.prop('unregister_account_button'));
+                        $("#unregister_account_button").removeClass("disabled");
+                        return;
+                    }
+
+                },
+
+                error: function (jqXHR, textStatus, errorThrown) {
+                    showErrorDialog(textStatus + ":" + jqXHR.status + " " + errorThrown);
+                    $("#unregister_account_button").text($.i18n.prop('unregister_account_button'));
+                    $("#unregister_account_button").removeClass("disabled");
+                }
+            })
+        }
+    </script>
+
+</head>
+<body>
+<div>
+    <div id="unregister_emelopee_msg">
+    </div>
+    <div class="openWin_hr">
+        <button id="delete_but" type="button" title="删除" class="btn btn-danger btn-group-lg f_r"
+                onclick="Unregisteremployee()">
+        </button>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>binding machine dialog</title>
+    <link rel="stylesheet" href="../../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../../css/style.css">
+    <script src="../../../js/jquery-1.10.2.js"></script>
+    <script src="../../../js/bootstrap.js"></script>
+    <script src="../../../js/hmac-sha256.js"></script>
+    <script src="../../../js/enc-base64.js"></script>
+    <script src="../../../js/util.js"></script>
+    <script src="../../../js/jquery.i18n.properties-1.0.9.js"></script>
+    <script src="../../../i18n/ElementLanguage.js"></script>
+    <script type="application/javascript" language="JavaScript">
+
+        function deleteDepartment() {
+            var admin = adminInfo.accountId;
+            var department_name = sessionStorage.getItem("departmentId");
+            var token = sessionStorage.getItem("token");
+            var param = {"departmentName": department_name};
+            req = getRequestParameter(admin, token, param);
+            $.ajax({
+                url: '/proxy',
+                type: 'get',
+                data: {
+                    url: "api/admin/deleteDepartment",
+                    param: req
+                },
+                beforeSend: function () {
+                    $("#delete_but").text($.i18n.prop('processing') + '....');
+                    $("#delete_but").addClass("disabled");
+                },
+                success: function (response) {
+                    response = $.parseJSON(response);
+                    if (response.token) {
+                        sessionStorage.setItem('token', response.token);
+                    }
+
+                    if(!verifyStatusCode(response.statusCode)){return}
+
+                    if( response.statusCode == 0) {
+                        $("#delete_but").text($.i18n.prop('processing') + '....');
+                        $("#delete_but").removeClass("disabled");
+                        closeDialog('dialogMachine');
+                        refreshWindow("iframepage");
+                    } else{
+                        showErrorDialog("error : " + statusCodeTranslate(response.statusCode));
+                        $("#delete_but").text($.i18n.prop('delete_but'));
+                        $("#delete_but").removeClass("disabled");
+                        return;
+                    }
+
+                },
+
+                error: function (jqXHR, textStatus, errorThrown) {
+                    showErrorDialog(textStatus + ":" + jqXHR.status + " " + errorThrown);
+                    $("#delete_but").text($.i18n.prop('delete_but'));
+                    $("#delete_but").removeClass("disabled");
+                }
+            })
+        }
+    </script>
+
+</head>
+<body>
+<div>
+    <div id="delete_department_msg">
+    </div>
+    <div class="openWin_hr">
+        <button id="delete_but" type="button" title="删除" class="btn btn-danger btn-group-lg f_r"
+                onclick="deleteDepartment()">
+        </button>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <!-- Bootstrap core CSS -->
+    <link href="../../../css/bootstrap.css" rel="stylesheet">
+    <link href="../../../css/bootstrap-table.css" rel="stylesheet">
+    <link href="../../../css/bootstrap-table.css" rel="stylesheet">
+    <link href="../../../css/jquery-confirm.min.css" rel="stylesheet">
+    <link href="../../../font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="../../../css/ui.daterangepicker.css" rel="stylesheet">
+    <link href="../../../css/jquery-ui-1.10.0.custom.css" rel="stylesheet">
+    <link href="../../../css/style.css" rel="stylesheet">
+
+    <script src="../../../js/jquery-1.10.2.js"></script>
+    <script src="../../../js/jquery.i18n.properties-1.0.9.js"></script>
+    <script src="../../../i18n/ElementLanguage.js"></script>
+    <script src="../../../js/bootstrap.js"></script>
+    <script src="../../../js/bootstrap-table.js"></script>
+    <script src="../../../js/tooltip.js"></script>
+    <script src="../../../js/bootstrap-table-mobile.js"></script>
+    <script src="../../../js/hmac-sha256.js"></script>
+    <script src="../../../js/enc-base64.js"></script>
+    <script src="../../../i18n/bootstrap-table-zh-cn.js"></script>
+    <script src="../../../i18n/bootstrap-table-zh-hk.js"></script>
+    <script src="../../../i18n/datepicker-zh-cn.js"></script>
+    <script src="../../../i18n/datepicker-zh-hk.js"></script>
+    <script src="../../../js/jquery-confirm.min.js"></script>
+    <script src="../../../js/util.js"></script>
+    <script src="../../../js/jquery-ui-1.9.2.custom.min.js"></script>
+    <script src="../../../js/bootstrap-table-filter-control.js"></script>
+    <script src="../../../js/daterangepicker.jQuery.js"></script>
+    <script src="../../../js/date.js"></script>
+
+    <script type="application/javascript">
+
+        $(document).ready(function () {
+            $(window).resize(function(){
+            $("#table").bootstrapTable('resetView',{'height':$(window).height()});
+            });
+            var lang = localStorage.getItem('lang');
+            var admin = '';
+            if(adminInfo){
+                var admin = adminInfo.accountId;
+            }
+            var token = sessionStorage.getItem("token");
+
+            $.extend($.fn.bootstrapTable.defaults, $.fn.bootstrapTable.locales[lang]);
+            $.datepicker.setDefaults($.datepicker.regional[lang]);
+            //Create account list table
+            var column_array =  [
+                {
+                    field: 'accountId',
+                    title: $.i18n.prop('accountId'),
+                    align: 'left',
+                    width: '20%',
+                    valign: 'middle',
+                    filterControl:'input',
+                    sortable: true
+                },
+                {
+                    field: 'firstName',
+                    title: $.i18n.prop('fistname_table_header'),
+                    align: 'left',
+                    width: '10%',
+                    valign: 'middle',
+                    filterControl:'input',
+                    sortable: true
+                },
+                {
+                    field: 'lastName',
+                    title: $.i18n.prop('lastname_table_header'),
+                    align: 'left',
+                    width: '10%',
+                    valign: 'middle',
+                    filterControl:'input',
+                    sortable: true
+                },
+                {
+                    field: 'registerDate',
+                    title: $.i18n.prop('register_date_table_header'),
+                    align: 'left',
+                    width: '20%',
+                    valign: 'middle',
+                    filterControl:'datepicker',
+                    filterDatepickerOptions:{
+                        dateFormat:"yy-mm-dd",
+                        doneButtonText:$.i18n.prop('Operation_confirm_button'),
+                        rangeStartTitle:$.i18n.prop('datepicker_range_start_title'),
+                        rangeEndTitle:$.i18n.prop('datepicker_range_end_title')
+                    },
+                    sortable: true,
+                    formatter:function(value) {
+                        return UnixToDate(DateToUnix(value),true);
+                    }
+                },
+                {
+                    field: 'departmentName',
+                    title: $.i18n.prop('department_name_table_header'),
+                    align: 'center',
+                    width: '15%',
+                    valign: 'middle',
+                    filterControl:'select',
+                    sortable: true,
+                },
+                {
+                    field: 'action',
+                    title: $.i18n.prop('action'),
+                    align: 'left',
+                    width: '10%',
+                    valign: 'middle',
+                    formatter: actionFormatter,
+                    events: actionEvents
+                }];
+            var init_table_params_obj = {
+                'url':'api/manage/listAdminAccounts',
+                'user':admin
+            };
+            generateTable('table',init_table_params_obj,column_array,'adminList');
+            //setting tooltip for function button
+            $("#createAccount").tooltip({
+                animation: true,
+                placement: 'bottom',
+                title: $.i18n.prop('create_account_tip')
+            });
+/*            $("#addAllContact").tooltip({
+                animation: true,
+                placement: 'bottom',
+                title: $.i18n.prop('update_contact_list_tip')
+            });
+            $("#importADAccount").tooltip({
+                animation: true,
+                placement: 'bottom',
+                title: $.i18n.prop('import_ad_account_tip')
+            });*/
+
+        });
+        function actionFormatter(value, row, index) {
+           var array = [
+             /*   '<a class="edit ml10" href="javascript:void(0)" title="Edit Employee">',
+                '<i class="glyphicon glyphicon-edit"></i>',
+                '</a>',*/
+                '<a class="remove ml10" href="javascript:void(0)" title="Unregister Employee">',
+                '<i class="glyphicon glyphicon-remove"></i>',
+                '</a>'
+            ];
+
+            if (row.roleLevel < adminInfo.roleLevel) {
+                return [].join('');
+            }
+            return array.join('');
+        }
+
+        window.actionEvents = {
+            'click .edit': function (e, value, row, index) {
+                var accountId = row.accountId;
+                var accountEmail = row.accountEmail;
+                var firstName = row.firstName;
+                var lastName = row.lastName;
+                var roleName = row.roleName;
+                var roleDescription = row.roleDescription;
+                sessionStorage.setItem('accountId', accountId);
+                sessionStorage.setItem('firstName', firstName);
+                sessionStorage.setItem('lastName', lastName);
+                sessionStorage.setItem('roleName', roleName);
+                sessionStorage.setItem('roleDescription', roleDescription);
+                onEditemployee(accountId, accountEmail);
+            },
+            'click .remove': function (e, value, row, index) {
+                var accountId = row.accountId;
+                var accountEmail = row.accountEmail;
+                onDeleteAdmin(accountId, accountEmail);
+            }
+        };
+
+/*
+        function onAddAllContact() {
+            var admin = ' ';
+            if( adminInfo){
+                admin = adminInfo.accountId;
+            }
+            var token = sessionStorage.getItem("token");
+            var req = getRequestParameter(admin, token);
+            $.ajax({
+                url: '/proxy',
+                type: 'get',
+                data: {
+                    url: "api/admin/importADAccounts",
+                    param: req
+                },
+                beforeSend: function () {
+
+                    $("#addAllContact").html($.i18n.prop('processing') + '<i class="fa fa-spinner fa-spin"></i>');
+                    $("#addAllContact").addClass("disabled");
+                },
+                success: function (response) {
+                    response = $.parseJSON(response);
+                    if (response.token) {
+                        sessionStorage.setItem('token', response.token);
+                    }
+
+                    if(!verifyStatusCode(response.statusCode)){return;}
+
+                    if( response.statusCode == 0) {
+                        $("#addAllContact").html('<i class="fa fa-user-secret fa-lg"></i>');
+                        $("#addAllContact").removeClass("disabled");
+                        $("#table").bootstrapTable('refresh');
+                        window.parent.showConfirmDialog();
+                    } else{
+                        showErrorDialog("error : " + statusCodeTranslate(response.statusCode));
+                    }
+                },
+
+                error: function (jqXHR, textStatus, errorThrown) {
+                    showErrorDialog(textStatus + ":" + jqXHR.status + " " + errorThrown);
+                }
+            });
+        }
+*/
+
+        function onRegisterAdmin() {
+            openOperationDialog($.i18n.prop('register_employee'),'view/company-admin/admin-management/add-admin-account.html');
+
+        }
+
+        function onEditemployee(accountEmail) {
+            openOperationDialog($.i18n.prop('edit_user_title') + ':' + accountEmail,'view/company-admin/account-list/edit-account.html');
+        }
+
+/*        function onImportADAccount() {
+            openOperationDialog($.i18n.prop('import_account_title'),'view/company-admin/account-list/ad-account-list.html');
+        }*/
+
+        function onDeleteAdmin(accountId, accountEmail) {
+            sessionStorage.setItem("accountId", accountId);
+            openOperationDialog($.i18n.prop('unregister_employee') + ': ' + accountEmail,'view/company-admin/admin-management/delete-admin.html','modal-sm');
+        }
+    </script>
+</head>
+<body>
+
+<div id="toolbar" class="btn-group">
+    <button type="button" class="btn btn-default" onclick="onRegisterAdmin()" id="createAccount"
+            style="margin-bottom: 2px;">
+        <i class="fa fa-user-plus fa-lg"></i>
+    </button>
+</div>
+
+
+
+<div class="table-responsive">
+    <table id="table">
+    </table>
+</div>
+
+</body>
+</html>

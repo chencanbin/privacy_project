@@ -1,0 +1,192 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>binding machine dialog</title>
+    <link rel="stylesheet" href="../../../css/bootstrap.css">
+    <link rel="stylesheet" href="../../../css/select2/select2.css">
+    <link rel="stylesheet" href="../../../css/select2/select2-bootstrap.css">
+    <link rel="stylesheet" href="../../../css/style.css">
+    <link rel="stylesheet" href="../../../css/bootstrap-tags.css">
+    <script src="../../../js/jquery-1.10.2.js"></script>
+    <script src="../../../js/bootstrap.js"></script>
+    <script src="../../../js/bootstrap-tags.min.js"></script>
+    <script src="../../../js/select2/select2.min.js"></script>
+    <script src="../../../js/hmac-sha256.js"></script>
+    <script src="../../../js/enc-base64.js"></script>
+    <script src="../../../js/jquery.i18n.properties-1.0.9.js"></script>
+    <script src="../../../i18n/ElementLanguage.js"></script>
+    <script src="../../../js/util.js"></script>
+    <script type="application/javascript" language="JavaScript">
+        var admin, token;
+        $(document).ready(function () {
+            admin = adminInfo.accountId;
+            token = sessionStorage.getItem("token");
+            var param = {"keyId": GetQueryString('keyId')};
+            var req = getRequestParameter(admin, token, param);
+
+            $.ajax({
+                url: '/proxy',
+                type: 'get',
+                data: {
+                    url: "api/manage/listfilepermission",
+                    param: req
+                },
+                success: function (response) {
+                    response = $.parseJSON(response);
+                    if (response.token) {
+                        sessionStorage.setItem('token', response.token);
+                    }
+
+                    if(!verifyStatusCode(response.statusCode)){return;}
+
+                    if (response.statusCode == 0) {
+                        var permissionList = response.permissionList;
+                        $.each(permissionList,function(i,val){
+                            $('#pTab').append('<li><a href="#p'+val.profileId+'" data-toggle="tab">'+val.profileId+'</a></li>');
+
+                            var tab_content = '<div class="tab-pane active" id="p'+val.profileId+'">'+
+                                              '<form class="form-horizontal" role="form" style="margin-top: 14px">'+
+                                              '<div class="form-group">'+
+                                              '<label class="col-sm-2 control-label" for="user_list">'+$.i18n.prop('file_permisstion_user_list')+':</label>'+
+                                              '<div class="col-sm-8">'+
+                                              '<div class="user_list" id="user_list" />'+
+                                              '</div>'+
+                                              '<label class="col-sm-2 control-label" for="allow_copy">'+$.i18n.prop('file_permisstion_allow_copy')+': <input type="checkbox" id="allow_copy" class="allow_copy"></label>'+
+                                              '</div>'+
+                                              '<div class="form-group" id="allow_viewing_form-group">'+
+                                              '<label class="col-sm-2 control-label" for="allow_viewing">'+$.i18n.prop('file_permisstion_allow_viewing')+':</label>'+
+                                              '<div class="col-sm-4">'+
+                                              '<input class="form-control allow_viewing" id="allow_viewing" type="text" placeholder="No limit"/>'+
+                                              '</div>'+
+                                              '<label class="col-sm-2 control-label" for="duration_per_viewing">'+$.i18n.prop('file_permisstion_duration_viewing')+':</label>'+
+                                              '<div class="col-sm-4">'+
+                                              '<input class="form-control duration_per_viewing" id="duration_per_viewing" type="text" placeholder="No limit"/>'+
+                                              '</div>'+
+                                              '</div>'+
+                                             '<div class="form-group" id="time_viewing_form-group">'+
+                                             '<label class="col-sm-2 control-label" for="start_time">'+$.i18n.prop('file_permisstion_start_viewing')+':</label>'+
+                                             '<div class="col-sm-4">'+
+                                             '<input class="form-control start_time" id="start_time" type="text" placeholder="2016-10-12 00:00:00"/>'+
+                                             '</div>'+
+                                             '<label class="col-sm-2 control-label" for="end_time">'+$.i18n.prop('file_permisstion_end_viewing')+':</label>'+
+                                             '<div class="col-sm-4">'+
+                                             '<input class="form-control end_time" id="end_time" type="text" placeholder="2016-10-13 00:00:00"/>'+
+                                             '</div>'+
+                                             '</div>'+
+                                             '<div class="form-group" id="check_form-group">'+
+                                             '<label class="col-sm-2 control-label" for="allow_off_line">'+$.i18n.prop('file_permisstion_allow_offline')+':</label>'+
+                                            '<div class="col-sm-2">'+
+                                            '<input type="checkbox" id="allow_off_line" class="allow_off_line" style="margin-top: 10px">'+
+                                            '</div>'+
+                                            '<label class="col-xs-offset-2 col-sm-2 control-label" for="disable_watermark">'+$.i18n.prop('file_permisstion_disable_watermark')+':</label>'+
+                                            '<div class="col-sm-2">'+
+                                            '<input type="checkbox" id="disable_watermark" class="disable_watermark" style="margin-top: 10px">'+
+                                            '</div>'+
+                                            '</div>'+
+                                            '</form>'+
+                                            '</div>';
+                            $('#tab-content').append(tab_content);
+
+                            if( val.allowCopy == 1) {
+                                $('#p'+val.profileId + ' .allow_copy').attr("checked","checked");
+                                $('#p'+val.profileId + ' #allow_viewing_form-group').hide();
+                                $('#p'+val.profileId + ' #time_viewing_form-group').hide();
+                                $('#p'+val.profileId + ' #check_form-group').hide();
+                            }
+
+                            $('#p'+val.profileId + ' .allow_copy').click(function(){
+                                if($(this).is(':checked')){
+                                    $('#p'+val.profileId + ' #allow_viewing_form-group').hide(1000);
+                                    $('#p'+val.profileId + ' #time_viewing_form-group').hide(1000);
+                                    $('#p'+val.profileId + ' #check_form-group').hide(1000);
+                                }else{
+                                    $('#p'+val.profileId + ' #allow_viewing_form-group').show(1000);
+                                    $('#p'+val.profileId + ' #time_viewing_form-group').show(1000);
+                                    $('#p'+val.profileId + ' #check_form-group').show(1000);
+
+                                }
+                            });
+
+                            if( val.allowOffline == 1){
+                                $('#allow_off_line').attr("checked","checked");
+                            }
+                            if( val.disableWatermark == 1){
+                                $('#disable_watermark').attr("checked","checked");
+                            }
+                            if(val.startTime) {
+                                $('#p'+val.profileId + ' .start_time').val(val.startTime);
+                            }else {
+                                $('#p'+val.profileId + ' .start_time').val('No limit');
+                            }
+                            if(val.numLimit) {
+                                $('#p'+val.profileId + ' .allow_viewing').val(val.numLimit);
+                            }else {
+                                $('#p'+val.profileId + ' .allow_viewing').val('No limit');
+                            }
+                            if(val.length) {
+                                $('#p'+val.profileId + ' .duration_per_viewing').val(val.numLimit);
+                            }else {
+                                $('#p'+val.profileId + ' .duration_per_viewing').val('No limit');
+                            }
+                            if(val.endTime) {
+                                $('#p'+val.profileId + ' .end_time').val(val.endTime);
+                            }else {
+                                $('#p'+val.profileId + ' .end_time').val('No limit');
+                            }
+                            $('#p'+val.profileId + ' .user_list').tags({
+                                promptText : 'Type to search',
+                                tagSize:'lg',
+                                tagClass:'btn-primary',
+                                maxNumTags:100,
+                                suggestions: val.userList,
+                                tagData: val.userList
+                            });
+                            $('#p'+val.profileId + ' input').attr('disabled','true');
+                        });
+                        $('#pTab a:eq(0)').tab('show');
+                        $('.tags-input').focus();
+
+
+                    } else {
+                        showErrorDialog("error : " + statusCodeTranslate(response.statusCode));
+                        $("#button_submit").text($.i18n.prop('sure_button'));
+                        $("#button_submit").removeClass("disabled");
+                        return;
+                    }
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    showErrorDialog(textStatus + ":" + jqXHR.status + " " + errorThrown);
+                    $("#button_submit").text($.i18n.prop('bind'));
+                    $("#button_submit").removeClass("disabled");
+                }
+            })
+        });
+
+        function productFormatResult(product) {
+            var html = "<table><tr>";
+            html += "<td>";
+            html += product.text;
+            html += "</td></tr></table>";
+            return html;
+        }
+
+        function productFormatSelection(product) {
+            var selected = "<input type='hidden' name='itemId' value='" + product.id + "'/>";
+            return selected + product.text;
+        }
+
+    </script>
+</head>
+<body style="margin-right: 16px;margin-left: 16px;"><!--
+
+
+
+-->
+<ul class="nav nav-tabs" id="pTab">
+</ul>
+<div class="tab-content" id="tab-content">
+
+</div>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>CONDOR SME</title>
+    <link rel="icon" href="img/logo-white.png" type="image/x-icon">
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/jquery-confirm.min.css" rel="stylesheet">
+    <!-- Add custom CSS here -->
+    <link href="css/sb-admin.css" rel="stylesheet">
+    <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+
+    <!-- Page Specific CSS -->
+    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/jquery-confirm.min.js"></script>
+    <script src="i18n/ElementLanguage.js"></script>
+    <script src="js/util.js"></script>
+    <script type="text/javascript" language="javascript">
+        var admin = '';
+        var roleLevel = '';
+        if (adminInfo == undefined || adminInfo == '') {
+            parent.location.href = '/view/error/404.html';
+        }
+
+        $(document).ready(function () {
+            $(window).resize(function(){
+                $('#iframepage').height($(window).height()-50);
+            });
+            $('window').height($(window).height()*0.9);
+            if (localStorage) {
+                if (localStorage.lang) {
+                    loadBundles(localStorage.lang);
+                } else {
+                    loadBundles($.i18n.browserLang());
+                }
+            } else {
+                loadBundles($.i18n.browserLang());
+            }
+            if (adminInfo) {
+                roleLevel = adminInfo.roleLevel;
+                admin = adminInfo.accountId;
+            }
+
+            $("#user_name").text(admin);
+            loadPage();
+
+
+
+
+            //after click navigation bars link，navigation hide
+            $('.navbar-collapse a:not(#link_user,#link_language)').click(function () {
+                $(".navbar-collapse").collapse('hide');
+            });
+
+        });
+
+        function loadPage() {
+            var PageArray = [];
+            if( roleLevel == 0) {
+                PageArray.push('<li><a href="#" onclick=\'loadTab("view/company-admin/department-management/department-list.html",0)\'><i class="fa fa-users">&nbsp;</i><span id="nav_department">'+ $.i18n.prop('nav_department') + '</span></a></li>');
+                PageArray.push('<li><a href="#" onclick=\'loadTab("view/company-admin/admin-management/admin-list.html",1)\'><i class="fa fa-user">&nbsp;</i><span id="nav_accountList">' + $.i18n.prop('nav_accountList') + '</span></a></li>');
+            }
+            if( roleLevel >= 1) {
+                PageArray.push('<li><a href="#" onclick=\'loadTab("view/company-admin/file-management/file-list.html",0)\'><i class="fa fa-file">&nbsp;</i><span id="nav_file_list">'+ $.i18n.prop('nav_file_list') + '</span></a></li>');
+            }
+            if( roleLevel > 1) {
+                PageArray.push('<li><a href="#" onclick=\'loadTab("view/company-admin/account-list/account-list.html",1)\'><i class="fa fa-users">&nbsp;</i><span id="nav_department">'+ $.i18n.prop('nav_accountList') + '</span></a></li>');
+
+            }
+
+            for (var i = 0; i < PageArray.length; i++) {
+                $('.side-nav').append(PageArray[i]);
+            }
+            if(roleLevel == 0){
+                loadTab('view/company-admin/department-management/department-list.html', 0);
+            }else {
+                loadTab("view/company-admin/file-management/file-list.html",0);
+            }
+            $("li:parent:first").addClass('active');
+        }
+
+        function logout_system() {
+            window.location.href = '/login/' + sessionStorage.getItem('departmentName');
+            sessionStorage.clear();
+        }
+
+        function onResetPassword() {
+            openOperationDialog($.i18n.prop('reset_password'), 'view/util/configuration/reset-password.html')
+        }
+
+        function onUpdateInfo() {
+            openOperationDialog($.i18n.prop('personal_information'), 'view/util/configuration/update-user-info.html');
+        }
+
+        function loadTab(url, index) {
+            $('li').removeClass('active');
+            $("li:parent:eq(" + index + ")").addClass('active');
+            var contain = '<iframe src="' +url +'" id="iframepage" name="iframepage"  style="width: 100%;border: 0;" ></iframe>';
+            $("#page-wrapper").empty();
+            $("#page-wrapper").append(contain);
+            $('#iframepage').height($(window).height()-50);
+        }
+
+        function reloadLanguage(language) {
+            loadBundles(language);
+            location.reload(true);
+        }
+
+        function showTimeoutDialog() {
+            $.alert({
+                title: $.i18n.prop('operation_timeout'),
+                content: $.i18n.prop('operation_timeout_msg'),
+                confirmButton: $.i18n.prop('Operation_confirm_button'),
+                confirmButtonClass: 'btn btn-danger btn-group-lg f_r',
+                backgroundDismiss: false,
+                confirm: function () {
+                    window.location.href = '/login/' + sessionStorage.getItem('departmentName');
+                    sessionStorage.clear();
+                }
+            });
+        }
+
+        function showUserLimitDialog() {
+            $.alert({
+                title: $.i18n.prop('operation_failure'),
+                content: $.i18n.prop('user_limit_msg'),
+                confirmButton: $.i18n.prop('Operation_confirm_button'),
+                confirmButtonClass: 'btn btn-danger btn-group-lg f_r',
+                backgroundDismiss: false,
+                confirm: function () {
+                    window.location.href = '/login/' + sessionStorage.getItem('departmentName');
+                    sessionStorage.clear();
+                }
+            });
+        }
+
+
+        function showStatusCodeDialog(msg) {
+            $.alert({
+                title: $.i18n.prop('operation_failure'),
+                content: msg,
+                confirmButton: $.i18n.prop('Operation_confirm_button'),
+                confirmButtonClass: 'btn btn-danger btn-group-lg f_r',
+                backgroundDismiss: false,
+                confirm: function () {
+                    window.location.href = '/login/' + sessionStorage.getItem('departmentName');
+                    sessionStorage.clear();
+                }
+            });
+        }
+
+        function showConfirmDialog() {
+            $.alert({
+                title: $.i18n.prop('operation_success'),
+                content: $.i18n.prop('update_contact_list'),
+                confirmButton: $.i18n.prop('Operation_confirm_button'),
+                confirmButtonClass: 'btn btn-success btn-group-lg f_r'
+            });
+        }
+    </script>
+
+    <style>
+        .navbar-inverse .navbar-brand {
+            color: #FFFFFF;
+        }
+
+        .navbar-inverse .navbar-nav > li > a {
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+
+<body>
+<div id="wrapper">
+    <!-- Sidebar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="index.html">Condor Management System</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-ex1-collapse" style="height: 0px">
+            <ul class="nav navbar-nav side-nav">
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right navbar-user">
+                <li class="dropdown alerts-dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="link_language">
+                        <i class="fa fa-lg fa-language"></i> <label id="language"></label>
+                        <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" onclick='reloadLanguage("zh-cn")'>简体中文 </a></li>
+                        <li><a href="#" onclick='reloadLanguage("zh-hk")'>繁體中文 </a></li>
+                        <li><a href="#" onclick='reloadLanguage("en")'>English</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown user-dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="link_user">
+                        <i class="fa fa-user"></i>&nbsp;&nbsp;<label id="user_name">admin</label><b
+                            class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" onclick="onUpdateInfo()"><i class="fa fa-info-circle"></i> <span
+                                id="reset_user_information"></span></a></li>
+                        <li><a href="#" onclick="onResetPassword()"><i class="fa fa-lock"></i> <span
+                                id="reset_password"></span></a></li>
+                        <li><a href="#" onclick="logout_system()"><i class="fa fa-power-off"></i> <span
+                                id="logout"></span></a></li>
+                    </ul>
+                    <div></div>
+                </li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </nav>
+
+    <!--main contain from iframe -->
+    <div id="page-wrapper"></div>
+    <div id="dialog_dock"></div>
+    <div class="modal fade" id="error_dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         style="z-index: 1060"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                    </button>
+                    <p style="margin : 10px;" class="text-warning text-center"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+
+<script src="js/bootstrap.js"></script>
+<!-- Page Specific Plugins -->
+<script src="js/raphael-min.js"></script>
+<script src="js/hmac-sha256.js"></script>
+<script src="js/enc-base64.js"></script>
+
+<!-- i18n support multi language-->
+<script src="js/jquery.i18n.properties-1.0.9.js"></script>
+</body>
+</html>

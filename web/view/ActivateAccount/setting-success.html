@@ -1,0 +1,118 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>CONDOR SME</title>
+    <link rel="icon" href="../../img/logo-white.png" type="image/x-icon">
+    <!-- Bootstrap core CSS -->
+    <link href="../../css/bootstrap.css" rel="stylesheet">
+    <!-- Add custom CSS here -->
+    <link href="../../css/sb-admin.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/formValidation.css">
+    <style>
+        #page-wrapper{
+            font-size:35px;
+            color: #5CB85C;
+        }
+    </style>
+    <!-- Page Specific CSS -->
+    <script src="../../js/jquery-1.10.2.js"></script>
+    <script src="../../i18n/ElementLanguage.js"></script>
+    <script src="../../js/util.js"></script>
+    <script type="text/javascript" language="javascript">
+        function reloadLanguage(language) {
+            loadBundles(language);
+            location.reload(true);
+        }
+
+        function directToLoginPage(){
+            window.location.href = '/login/'+ GetQueryString('departmentName');
+        }
+    </script>
+
+</head>
+
+<body style="background: #F5F5F5">
+
+<div>
+    <!-- Sidebar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <img src="../../img/SD_condor.png" style="margin-top: 5px;"/>
+    </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-ex1-collapse" style="height: 0px">
+            <ul class="nav navbar-nav navbar-right navbar-user">
+                <li class="dropdown alerts-dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="link_language">
+                        <i class="fa fa-lg fa-language"></i> <label id="language"></label>
+                        <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" onclick='reloadLanguage("zh-cn")'>简体中文 </a></li>
+                        <li><a href="#" onclick='reloadLanguage("zh-hk")'>繁體中文 </a></li>
+                        <li><a href="#" onclick='reloadLanguage("en")'>English</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </nav>
+
+    <!--main contain from iframe -->
+    <div id="page-wrapper">
+        <div class="container" style="background: #ffffff;margin-top: 170px;height: 50%">
+            <div class="row">
+                <div class="col-md-12 text-center" style="margin-top: 10%">
+                <i class="fa fa-check-circle" style="font-size: 50px;"></i><span style="padding-left: 20px;" id="activate_success_message">恭喜您,激活账户成功</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 text-center" style="margin-top: 5%">
+                    <button type="button" class="btn btn-success" style="font-size: 35px" onclick="directToLoginPage();"><span id="click_to_login">点击登录</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="dialog_dock"></div>
+    <div class="modal fade" id="error_dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         style="z-index: 1060"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                    </button>
+                    <p style="margin : 10px;" class="text-warning text-center"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+
+<script src="../../js/bootstrap.js"></script>
+<script src="../../js/formValidation.js"></script>
+<script src="../../js/bootstrap_for_validation.js"></script>
+<!-- Page Specific Plugins -->
+<script src="../../js/raphael-min.js"></script>
+<script src="../../js/hmac-sha256.js"></script>
+<script src="../../js/enc-base64.js"></script>
+
+<!-- i18n support multi language-->
+<script src="../../js/jquery.i18n.properties-1.0.9.js"></script>
+</body>
+</html>
