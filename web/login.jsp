@@ -70,6 +70,10 @@
 
         });
 
+        function reloadLanguage(language) {
+            loadBundles(language);
+            location.reload(true);
+        }
 
 
         function validate() {
@@ -148,11 +152,25 @@
         }
 
     </script>
-
+    <style>
+        .language a {
+            padding-right: 10px;
+        }
+        .language {
+            padding-top: 5px; z-index: 1000;
+        }
+    </style>
 </head>
 <body class="login-bg">
 
 <div class="login-wrapper">
+    <div>
+        <div class="col-md-offset-10 col-md-2 language">
+            <a href="#" onclick='reloadLanguage("zh-cn")'>简体中文 </a>
+            <a href="#" onclick='reloadLanguage("zh-hk")'>繁體中文 </a>
+            <a href="#" onclick='reloadLanguage("en")'>English</a>
+        </div>
+    </div>
     <a href="#">
         <img class="logo" id="title_logo" style="margin-top: 30px;">
     </a>

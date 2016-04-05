@@ -160,6 +160,34 @@
                 confirmButtonClass: 'btn btn-success btn-group-lg f_r'
             });
         }
+
+        function showSuspendConfirmDialog(accountName) {
+            $.alert({
+                title: $.i18n.prop('operation_success'),
+                content: '<strong>'+accountName+'</strong>' +' ' + $.i18n.prop('suspend_account_success'),
+                confirmButton: $.i18n.prop('Operation_confirm_button'),
+                confirmButtonClass: 'btn btn-success btn-group-lg f_r'
+            });
+        }
+
+        function showResendEmailConfirmDialog() {
+            $.alert({
+                title: $.i18n.prop('operation_success'),
+                content: $.i18n.prop('resend_email_success'),
+                confirmButton: $.i18n.prop('Operation_confirm_button'),
+                confirmButtonClass: 'btn btn-success btn-group-lg f_r'
+            });
+        }
+
+
+        function showRestoreConfirmDialog(accountName) {
+            $.alert({
+                title: $.i18n.prop('operation_success'),
+                content: '<strong>'+accountName+'</strong>' +' ' + $.i18n.prop('restore_account_success'),
+                confirmButton: $.i18n.prop('Operation_confirm_button'),
+                confirmButtonClass: 'btn btn-success btn-group-lg f_r'
+            });
+        }
     </script>
 
     <style>

@@ -6,20 +6,113 @@
     <link rel="stylesheet" href="../../../css/select2/select2.css">
     <link rel="stylesheet" href="../../../css/select2/select2-bootstrap.css">
     <link rel="stylesheet" href="../../../css/style.css">
+    <link rel="stylesheet" href="../../../font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../../css/formValidation.css">
+
     <script src="../../../js/jquery-1.10.2.js"></script>
     <script src="../../../js/bootstrap.js"></script>
+    <script src="../../../js/formValidation.js"></script>
+    <script src="../../../js/bootstrap_for_validation.js"></script>
     <script src="../../../js/select2/select2.min.js"></script>
     <script src="../../../js/hmac-sha256.js"></script>
     <script src="../../../js/enc-base64.js"></script>
     <script src="../../../js/jquery.i18n.properties-1.0.9.js"></script>
     <script src="../../../i18n/ElementLanguage.js"></script>
     <script src="../../../js/util.js"></script>
+
+    <style>
+        span{
+            float: right;
+        }
+    </style>
     <script type="application/javascript" language="JavaScript">
         var admin, token,roleLevel;
         $(document).ready(function () {
             admin = adminInfo.accountId;
             token = sessionStorage.getItem("token");
             roleLevel = sessionStorage.getItem('roleLevel');
+            $('#createAccount').formValidation({
+                fields: {
+                    account: {
+                        validators: {
+                            notEmpty: {
+                                message: $.i18n.prop('account_input')
+                            },
+                            emailAddress:{
+                                message:$.i18n.prop('valid_email')
+                            }
+                        }
+                    },
+                    firstname: {
+                        validators: {
+                            notEmpty: {
+                                message:$.i18n.prop('firstname_input')
+                            }
+                        }
+                    },
+                    lastname: {
+                        validators: {
+                            notEmpty: {
+                                message: $.i18n.prop('lastname_input')
+                            }
+                        }
+                    }
+                },
+                button: {
+                    // The submit buttons selector
+                    // These buttons will be disabled to prevent the valid form from multiple submissions
+                    selector: '[type="button"]',
+                    // The disabled class
+                    disabled: ''
+                }
+            });
+            $("#roleName").select2({
+                minimumResultsForSearch: Infinity,
+                ajax: {
+                    url: "/proxy",
+                    type: "get",
+                    dataType: 'json',
+                    data: function (term, page) {
+                        token = sessionStorage.getItem('token');
+                        return {
+                            'url': 'api/manage/listroles',
+                            'param': getRequestParameter(admin, token),
+                            'q': term // search term
+                        };
+                    },
+                    results: function (result, page) {
+                        if (result.token) {
+                            sessionStorage.setItem('token', result.token);
+                        }
+
+                        if(!verifyStatusCode(result.statusCode)){return;}
+
+                        if (result.statusCode == 0) {
+                            var original_data = result.roleList;
+                            var select_data = [];
+                            var roleLevel = adminInfo.roleLevel;
+                            $.each(original_data, function (key, value) {
+                                if (value.roleLevel < roleLevel) {
+                                    select_data.push({"id": value.roleName, "text": value.roleDescription});
+                                }
+                            })
+                            return {results: select_data}
+                        } else {
+                            showErrorDialog("error : " + statusCodeTranslate(result.statusCode));
+                            return;
+                        }
+
+                    }
+                },
+                formatResult: function (exercise) {
+                    return "<div class='select2-user-result'>" + exercise.text + "</div>";
+                },
+                escapeMarkup: function (markup) {
+                    return markup
+                },
+                formatResult: productFormatResult,
+                formatSelection: productFormatSelection
+            })
         });
 
         function productFormatResult(product) {
@@ -39,7 +132,9 @@
             var accountId = $("#account").val();
             var firstName = $('#firstName').val();
             var lastName = $('#lastName').val();
+            var roleName = $('#roleName').val();
             token = sessionStorage.getItem("token");
+
             if(!accountId) {
                 showErrorDialog($.i18n.prop('account_input'));
                 return;
@@ -58,7 +153,11 @@
                 showErrorDialog($.i18n.prop('lastname_input'));
                 return;
             }
-            var param = {"accountId":accountId,"firstName":firstName,"lastName":lastName};
+            if(!roleName) {
+                showErrorDialog($.i18n.prop('role_input'));
+                return;
+            }
+            var param = {"accountId":accountId,"firstName":firstName,"lastName":lastName,"roleName": roleName};
             req = getRequestParameter(admin, token, param);
             $.ajax({
                 url: '/proxy',
@@ -103,25 +202,42 @@
     </script>
 </head>
 <body style="margin-right: 16px;margin-left: 16px;">
+    <form id="createAccount" class="form-horizontal" role="form">
+        <fieldset>
+            <div class="form-group">
+                <label class="col-xs-3 control-label" ><span id="account_input_title">account</span></label>
+                <div class="col-xs-9">
+                    <input id="account" class="form-control select2" name="account" placeholder="please input account"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-xs-3 control-label"><span id="fistname_input_title">first name</span></label>
+                <div class="col-xs-9">
+                    <input id="firstName" class="form-control select2" name="firstname" placeholder="please input firstName"/>
+                </div>
+            </div>
 
-    <div class="input-group input-group-sm dialog_row">
-        <span class="input-group-addon" id="account_input_title">account：&nbsp;&nbsp;&nbsp;</span>
-        <input id="account" class="form-control select2" placeholder="please input account"/>
-    </div>
-    <div class="input-group input-group-sm dialog_row">
-        <span class="input-group-addon" id="fistname_input_title">first name：</span>
-        <input id="firstName" class="form-control select2" placeholder="please input firstName"/>
-    </div>
-    <div class="input-group input-group-sm dialog_row">
-        <span class="input-group-addon"  id="lastname_input_title">last name：</span>
-        <input id="lastName" class="form-control select2" placeholder="please input lastName"/>
-    </div>
-    <div class="openWin_hr">
-        <button id="button_submit" type="button" title="确定" class="btn btn-primary btn-group-lg f_r"
-                onclick="addAccount()">
-            <span id="sure_button"></span>
-        </button>
-    </div>
-
+            <div class="form-group">
+                <label class="col-xs-3 control-label"><span id="lastname_input_title"></span></label>
+                <div class="col-xs-9">
+                    <input id="lastName" class="form-control" name="lastname" placeholder="please input lastName"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-xs-3 control-label"><span id="role_input_title">Role Name：</span></label>
+                <div class="col-xs-9">
+                    <input id="roleName" class="form-control select2" placeholder="please input company name"/>
+                </div>
+            </div>
+        </fieldset>
+        <div class="form-group">
+            <div class="col-sm-9 col-sm-offset-3">
+                <button id="button_submit" type="button" disabled title="确定" class="btn btn-primary btn-group-lg f_r"
+                        onclick="addAccount()">
+                    <span id="sure_button"></span>
+                </button>
+            </div>
+        </div>
+    </form>
 </body>
 </html>

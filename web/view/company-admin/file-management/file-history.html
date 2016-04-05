@@ -18,7 +18,6 @@
     <script src="../../../i18n/ElementLanguage.js"></script>
     <script src="../../../js/bootstrap.js"></script>
     <script src="../../../js/bootstrap-table.js"></script>
-    <script src="../../../js/tooltip.js"></script>
     <script src="../../../js/bootstrap-table-mobile.js"></script>
     <script src="../../../js/hmac-sha256.js"></script>
     <script src="../../../js/enc-base64.js"></script>
@@ -51,6 +50,24 @@
             //Create account list table
             var column_array =  [
                 {
+                    field: 'Date',
+                    title: $.i18n.prop('time_table_header'),
+                    align: 'left',
+                    width: '10%',
+                    valign: 'middle',
+                    filterControl:'datepicker',
+                    filterDatepickerOptions:{
+                        dateFormat:"yy-mm-dd",
+                        doneButtonText:$.i18n.prop('Operation_confirm_button'),
+                        rangeStartTitle:$.i18n.prop('datepicker_range_start_title'),
+                        rangeEndTitle:$.i18n.prop('datepicker_range_end_title')
+                    },
+                    sortable: true,
+                    formatter:function(value) {
+                        return UnixToDate(DateToUnix(value),true);
+                    }
+                },
+                {
                     field: 'Doer',
                     title: $.i18n.prop('operator_table_header'),
                     align: 'left',
@@ -76,26 +93,6 @@
                     valign: 'middle',
                     filterControl:'input',
                     sortable: true
-                },
-
-
-                {
-                    field: 'Date',
-                    title: $.i18n.prop('time_table_header'),
-                    align: 'left',
-                    width: '10%',
-                    valign: 'middle',
-                    filterControl:'datepicker',
-                    filterDatepickerOptions:{
-                        dateFormat:"yy-mm-dd",
-                        doneButtonText:$.i18n.prop('Operation_confirm_button'),
-                        rangeStartTitle:$.i18n.prop('datepicker_range_start_title'),
-                        rangeEndTitle:$.i18n.prop('datepicker_range_end_title')
-                    },
-                    sortable: true,
-                    formatter:function(value) {
-                        return UnixToDate(DateToUnix(value),true);
-                    }
                 },
                 {
                     field: 'Result',

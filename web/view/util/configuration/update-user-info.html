@@ -6,14 +6,23 @@
     <link rel="stylesheet" href="../../../css/select2/select2.css">
     <link rel="stylesheet" href="../../../css/select2/select2-bootstrap.css">
     <link rel="stylesheet" href="../../../css/style.css">
+    <link rel="stylesheet" href="../../../css/formValidation.css">
     <script src="../../../js/jquery-1.10.2.js"></script>
     <script src="../../../js/bootstrap.js"></script>
+    <script src="../../../js/formValidation.js"></script>
+    <script src="../../../js/bootstrap_for_validation.js"></script>
     <script src="../../../js/select2/select2.min.js"></script>
     <script src="../../../js/hmac-sha256.js"></script>
     <script src="../../../js/enc-base64.js"></script>
     <script src="../../../js/jquery.i18n.properties-1.0.9.js"></script>
     <script src="../../../i18n/ElementLanguage.js"></script>
     <script src="../../../js/util.js"></script>
+    <style>
+        span{
+            float: right;
+        }
+
+    </style>
     <script type="application/javascript" language="JavaScript">
         var admin, token, firstName, lastName, securityQuestion, securityAnswer;
         $(document).ready(function () {
@@ -114,28 +123,45 @@
 </head>
 <body style="margin-right: 16px;margin-left: 16px;">
 
-<div class="input-group input-group-sm dialog_row">
-    <span class="input-group-addon" id="fistname_input_title">First Name：</span>
-    <input id="firstName" class="form-control select2" placeholder="please input firstName"/>
-</div>
-<div class="input-group input-group-sm dialog_row">
-    <span class="input-group-addon" id="lastname_input_title">Last Name：</span>
-    <input id="lastName" class="form-control select2" placeholder="please input lastName"/>
-</div>
-<div class="input-group input-group-sm dialog_row">
-    <span class="input-group-addon" id="security_question_title">Security Question：</span>
-    <input id="securityQuestion" class="form-control select2" placeholder="please input security answer"/>
-</div>
-<div class="input-group input-group-sm dialog_row">
-    <span class="input-group-addon" id="security_answer_title">Security Answer：</span>
-    <input id="securityAnswer" class="form-control select2" placeholder="please input security question"/>
-</div>
 
-<div class="openWin_hr">
-    <button id="button_submit" type="button" title="确定" class="btn btn-primary btn-group-lg f_r"
-            onclick="modifyUserInfo()">
-        <span id="modify_button"></span>
-    </button>
-</div>
+<form id="updateUserInfo" method="post" class="form-horizontal">
+    <fieldset>
+        <div class="form-group">
+            <label class="col-xs-4 control-label"><span id="fistname_input_title">First Name</span></label>
+            <div class="col-xs-8">
+                <input id="firstName" name="firstName" class="form-control select2" placeholder="please input firstName"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-xs-4 control-label"> <span id="lastname_input_title">Last Name：</span></label>
+            <div class="col-xs-8">
+                <input id="lastName" class="form-control select2" placeholder="please input lastName"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-xs-4 control-label"><span id="security_question_title">security question</span></label>
+            <div class="col-xs-8">
+                <input id="securityQuestion" name="s_question" class="form-control select2" placeholder="please input security question"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-xs-4 control-label"> <span id="security_answer_title">security answer</span></label>
+            <div class="col-xs-8">
+                <input id="securityAnswer" name="s_answer" class="form-control select2" placeholder="please input security answer"/>
+            </div>
+        </div>
+    </fieldset>
+
+    <div class="form-group">
+        <div class="col-xs-9 col-xs-offset-3">
+            <button id="button_submit" type="button" title="确定" class="btn btn-primary btn-group-lg f_r"
+                    onclick="modifyUserInfo()">
+                <span id="modify_button"></span>
+            </button>
+        </div>
+    </div>
+</form>
 </body>
 </html>

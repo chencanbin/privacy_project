@@ -43,7 +43,7 @@ function DateToUnix(string) {
                 parseInt(t[0], 10) || null,
                 parseInt(t[1], 10) || null,
                 parseInt(t[2], 10) || null
-            )).getTime() / 1000;
+            )).getTime();
     }else {
         return;
     }
@@ -80,7 +80,8 @@ function UnixToDate(unixTime, isFull, timeZone) {
         return;
     }
     unixTime = parseInt(unixTime);
-    var time = new Date(unixTime * 1000);
+    var date = new Date();
+    var time = new Date(unixTime + date.getTimezoneOffset()*-1*60*1000);
     var year = time.getYear()+1900;
     var month = time.getMonth()+1;
     var date = time.getDate();
@@ -182,18 +183,15 @@ function getRequestParameter(accountId, token, paramsObj) {
     '<platform>' + 'WINDOWS' + '</platform>' +
     '<clientIP></clientIP>' +
     '</request>';
-    console.log(rst);
     return rst;
 }
 
 function generateParmXML(obj) {
-    console.log(obj);
     var parmXML = '<request>';
     $.each(obj, function (key, value) {
         parmXML += '<' + key + '>' + value + '</' + key + '>';
     });
     parmXML += '</request>';
-    console.log(parmXML);
     return parmXML;
 }
 
@@ -272,7 +270,6 @@ function closeDialog(id) {
 
 function showErrorDialog(msg) {
     var dialog = window.top.$("#error_dialog");
-    console.log(dialog);
     var p = dialog.find("p");
     p.empty();
     p.append(msg);
